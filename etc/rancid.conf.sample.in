@@ -82,3 +82,9 @@ RCSSYS=@RCSSYS@; export RCSSYS
 # it to "" or adding X- style headers.  Individual headers must be separated
 # by a \n.
 #MAILHEADERS="Precedence: bulk"; export MAILHEADERS
+#
+# RANCID will normally send out it's mail using plain text. As part of the "color"
+# branch in the git repo at github.com/dotwaffle/rancid-git there is the option
+# to print out the colors you get in git, including bolded lettering etc.
+# To turn this feature on, uncomment the following line:
+#COLOR=YES; export COLOR

@@ -45,7 +45,7 @@
 
 # print a usage message to stderr
 pr_usage() {
-    echo "usage: $0 [-V] [-r device_name] [-m mail rcpt] group" >&2;
+    echo "usage: $0 [-V] [-r device_name] [-m mail rcpt] [-f formatoutput] group" >&2;
 }
 
 # command-line options
@@ -85,6 +85,11 @@ if [ $# -ge 1 ] ; then
 	    pr_usage
 	    exit 0
 	    ;;
+	-f)
+	    shift
+	    formatoutput=$1
+	    shift
+	    ;;
 	-*)
 	    echo "unknown option: $1" >&2
 	    pr_usage
@@ -106,6 +111,11 @@ fi
 DIR=$BASEDIR/$GROUP
 TMP=${TMPDIR:=/tmp}/rancid.$GROUP.$$
 trap 'rm -fr $TMP;' 1 2 15
+
+# If there's not outputformat, just cat the output
+if [ ! -n "$formatoutput" ] ; then
+	formatoutput="cat"
+fi
 
 # disable noclobber
 unset noclobber > /dev/null 2>&1
@@ -778,11 +788,11 @@ cd $DIR
 case $RCSSYS in
     cvs )
 	cvs -f @DIFF_CMD@ -ko | sed -e '/^RCS file: /d' -e '/^--- /d' \
-	    -e '/^+++ /d' -e 's/^\([-+ ]\)/\1 /' | ansi2html >$TMP.diff
+	    -e '/^+++ /d' -e 's/^\([-+ ]\)/\1 /' | $formatoutput >$TMP.diff
 	cvs commit -m "$message"
 	;;
     svn )
-	svn diff | sed -e '/^+++ /d' -e 's/^\([-+ ]\)/\1 /' | ansi2html >$TMP.diff
+	svn diff | sed -e '/^+++ /d' -e 's/^\([-+ ]\)/\1 /' | $formatoutput >$TMP.diff
 	svn commit -m "$message"
 	;;
     git )
@@ -797,7 +807,7 @@ case $RCSSYS in
 	    git commit -m "$message"
 	    if [ $? -eq 0 ]; then
 		# only generate a diff if the commit was successful
-		git diff --color --patch-with-stat HEAD^ HEAD -- .  | ansi2html >$TMP.diff
+		git diff --color --patch-with-stat HEAD^ HEAD -- .  | $formatoutput >$TMP.diff
 	    fi
 	) 200>$BASEDIR/.lockfile
 	;;
